@@ -1,0 +1,13 @@
+diff --git a/build-tools/windows/build.cmd b/build-tools/windows/build.cmd
+index 1ab5295217..2d3d27d363 100644
+--- a/build-tools/windows/build.cmd
++++ b/build-tools/windows/build.cmd
+@@ -1031,6 +1031,8 @@ for %%a in (%EXT_TARGETS%) do (
+     if defined TEST_HAS_TARGET (
+         echo Building ext_%%a...
+         "%CMAKE_EXE%" --build . --config %CMAKE_BUILD_TYPE% -j%PARALLEL_JOBS% --target ext_%%a
++        if "%%a" == "boost" del /s /q ext_boost\ext_boost-prefix\src\ext_boost
++        if "%%a" == "qt" del /s /q ext_qt\b ext_qt\s
+         if errorlevel 1 (
+             echo ERROR: Building of ext_%%a failed! 1>&2
+             exit /b 105
