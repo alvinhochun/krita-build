@@ -1,0 +1,170 @@
+name: Windows Build
+
+# Controls when the workflow will run
+on:
+  # # Triggers the workflow on push or pull request events but only for the "master" branch
+  # push:
+  #   branches: [ "master" ]
+  # pull_request:
+  #   branches: [ "master" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build-deps:
+    # The type of runner that the job will run on
+    runs-on: windows-latest
+
+    env:
+      ASAN_OPTIONS: halt_on_error=0
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+          architecture: 'x64'
+
+      - name: Install compiler
+        run: |
+          Invoke-WebRequest "https://github.com/mstorsjo/llvm-mingw/releases/download/20220323/llvm-mingw-20220323-ucrt-x86_64.zip" -OutFile llvm-mingw-20220323-ucrt-x86_64.zip
+          mkdir llvm-mingw-20220323-ucrt-x86_64
+          compact /c llvm-mingw-20220323-ucrt-x86_64
+          7z x llvm-mingw-20220323-ucrt-x86_64.zip
+          rm llvm-mingw-20220323-ucrt-x86_64.zip
+          if (!(Test-Path "$pwd\llvm-mingw-20220323-ucrt-x86_64\bin\clang++.exe")) { return 1 }
+
+      - name: Install Ninja
+        run: |
+          Invoke-WebRequest "https://github.com/ninja-build/ninja/releases/download/v1.11.0/ninja-win.zip" -OutFile ninja-win.zip
+          7z e ninja-win.zip -o"$pwd\ninja"
+          rm ninja-win.zip
+          if (!(Test-Path "$pwd\ninja\ninja.exe")) { return 1 }
+
+      # - name: Install Python 3.8
+      #   run: |
+      #     Invoke-WebRequest "https://www.python.org/ftp/python/3.8.10/python-3.8.10-amd64.exe" -OutFile python-3.8.10-amd64.exe
+      #     .\python-3.8.10-amd64.exe /quiet TargetDir="$pwd\python38" AssociateFiles=0 Shortcuts=0 Include_doc=0 Include_launcher=0 Include_tcltk=0 Include_test=0
+      #     if (!(Test-Path "$pwd\python38\python.exe")) { return 1 }
+
+      - name: Clone Krita source and patch
+        run: |
+          git clone --depth=1 -b master https://invent.kde.org/graphics/krita.git krita-src
+          cd krita-src
+          git apply ..\sanitizers.patch
+
+      # - name: test
+      #   run: |
+      #     $env:PATH = "C:\Program Files\Git\cmd;$env:PATH"
+      #     echo $env:PATH
+      #     (gcm bash).Path
+      #     (gcm sh).Path
+      #     (gcm mingw32-make).Path
+      #     (gcm make).Path
+
+      - name: Build deps
+        run: |
+          $env:PATH = "C:\Program Files\Git\cmd;$env:PATH"
+          $env:MINGW_BIN_DIR = "$pwd\llvm-mingw-20220323-ucrt-x86_64\bin"
+          $env:NINJA_BIN_DIR = "$pwd\ninja"
+          # $env:PYTHON_BIN_DIR = "$pwd\python38"
+          $env:PATH = "$pwd\i\bin;$pwd\i\lib;$env:MINGW_BIN_DIR;$env:MINGW_BIN_DIR\..\x86_64-w64-mingw32\bin;$env:NINJA_BIN_DIR;$env:PATH"
+          # $env:VERBOSE = "1"
+          $env:QT_ENABLE_ASAN = "ON"
+          mkdir b_deps
+          mkdir i
+          compact /c b_deps i
+          krita-src\build-tools\windows\build.cmd --no-interactive --skip-krita --download-dir "$pwd\d" --deps-build-dir "$pwd\b_deps" --deps-install-dir "$pwd\i"
+          rm -r -fo d
+          rm -r -fo b_deps
+
+      - name: Package deps
+        run: |
+          7z a -t7z -mx=9 -myx=9 -ms=on krita-deps.7z i
+
+      - name: Upload deps artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: krita-deps
+          path: krita-deps.7z
+
+  build-krita:
+    runs-on: windows-latest
+    needs: build-deps
+    env:
+      ASAN_OPTIONS: halt_on_error=0
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: krita-deps
+
+      - name: Extract deps
+        run: |
+          mkdir i
+          compact /c i
+          7z x krita-deps.7z
+          rm krita-deps.7z
+          if (!(Test-Path "$pwd\i")) { return 1 }
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+          architecture: 'x64'
+
+      - name: Install compiler
+        run: |
+          Invoke-WebRequest "https://github.com/mstorsjo/llvm-mingw/releases/download/20220323/llvm-mingw-20220323-ucrt-x86_64.zip" -OutFile llvm-mingw-20220323-ucrt-x86_64.zip
+          mkdir llvm-mingw-20220323-ucrt-x86_64
+          compact /c llvm-mingw-20220323-ucrt-x86_64
+          7z x llvm-mingw-20220323-ucrt-x86_64.zip
+          rm llvm-mingw-20220323-ucrt-x86_64.zip
+          if (!(Test-Path "$pwd\llvm-mingw-20220323-ucrt-x86_64\bin\clang++.exe")) { return 1 }
+
+      - name: Install Ninja
+        run: |
+          Invoke-WebRequest "https://github.com/ninja-build/ninja/releases/download/v1.11.0/ninja-win.zip" -OutFile ninja-win.zip
+          7z e ninja-win.zip -o"$pwd\ninja"
+          rm ninja-win.zip
+          if (!(Test-Path "$pwd\ninja\ninja.exe")) { return 1 }
+
+      - name: Clone Krita source and patch
+        run: |
+          git clone --depth=1 -b master https://invent.kde.org/graphics/krita.git krita-src
+          cd krita-src
+          git apply ..\sanitizers.patch
+
+      - name: Build deps
+        run: |
+          $env:PATH = "C:\Program Files\Git\cmd;$env:PATH"
+          $env:MINGW_BIN_DIR = "$pwd\llvm-mingw-20220323-ucrt-x86_64\bin"
+          $env:NINJA_BIN_DIR = "$pwd\ninja"
+          # $env:PYTHON_BIN_DIR = "$pwd\python38"
+          $env:PATH = "$pwd\i\bin;$pwd\i\lib;$env:MINGW_BIN_DIR;$env:MINGW_BIN_DIR\..\x86_64-w64-mingw32\bin;$env:NINJA_BIN_DIR;$env:PATH"
+          # $env:VERBOSE = "1"
+          $env:KRITA_ENABLE_SANITIZERS = "address;undefined"
+          mkdir b_krita
+          compact /c b_krita
+          krita-src\build-tools\windows\build.cmd --no-interactive --skip-deps  --download-dir "$pwd\d" --deps-install-dir "$pwd\i" --krita-build-dir "$pwd\b_krita" --plugins-build-dir "$pwd\b_plugins" --krita-install-dir "$pwd\i"
+          rm -r -fo b_krita
+      
+      - name: Package Krita
+        run: |
+          $package_suffix = git --git-dir "krita-src/.git" describe --dirty
+          krita-src\packaging\windows\package-complete.cmd --no-interactive --deps-install-dir "$pwd\i" --krita-install-dir "$pwd\i" --package-name "krita-$package_suffix"
+          mkdir out
+          mv "krita-$package_suffix.zip" out\
+          mv "krita-$package_suffix-dbg.zip" out\
+
+      - name: Upload deps artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: krita-packages
+          path: out/*.zip

@@ -1,0 +1,154 @@
+diff --git a/3rdparty/CMakeLists.txt b/3rdparty/CMakeLists.txt
+index 55c9f34586..535ba939c9 100644
+--- a/3rdparty/CMakeLists.txt
++++ b/3rdparty/CMakeLists.txt
+@@ -92,6 +92,10 @@ if (WIN32 OR LINUX)
+ option(QT_ENABLE_DEBUG_INFO "Build Qt with full debug info included" OFF)
+ endif()
+ 
++if (MINGW)
++    option(QT_ENABLE_ASAN "Build Qt with ASAN+UBSAN" OFF)
++endif ()
++
+ if (WIN32)
+         option(ENABLE_MSYS2_FIXES "Enable patches that are needed for MSYS2+Clang Krita build" OFF)
+ 	option(QT_ENABLE_DYNAMIC_OPENGL "Build Qt with dynamic ANGLE support '-opengl dynamic -angle' (needs env var 'WindowsSdkDir' set to path of Windows 10 SDK)" ON)
+diff --git a/3rdparty/ext_qt/CMakeLists.txt b/3rdparty/ext_qt/CMakeLists.txt
+index d92759012e..67828c4916 100644
+--- a/3rdparty/ext_qt/CMakeLists.txt
++++ b/3rdparty/ext_qt/CMakeLists.txt
+@@ -51,6 +51,7 @@ if (WIN32)
+         -no-feature-qdoc
+         -no-direct2d
+         #
++        -verbose
+         -release -platform ${QT_CONFIG_PLATFORM} -prefix ${EXTPREFIX_qt}
+         QMAKE_LFLAGS_APP+=${SECURITY_EXE_LINKER_FLAGS}
+         QMAKE_LFLAGS_SHLIB+=${SECURITY_SHARED_LINKER_FLAGS}
+@@ -90,6 +91,13 @@ if (WIN32)
+                 QMAKE_CXXFLAGS+=-gdwarf-aranges
+             )
+         endif ()
++        if (QT_ENABLE_ASAN)
++            list(APPEND _QT_conf
++                QMAKE_CFLAGS+=-fsanitize=address,undefined
++                QMAKE_CXXFLAGS+=-fsanitize=address,undefined
++                QMAKE_LFLAGS+=-fsanitize=address,undefined
++            )
++        endif ()
+     elseif (MSVC)
+       if (NOT QT_ENABLE_DEBUG_INFO)
+         # Generate minimal debug info for backtraces
+diff --git a/build-tools/windows/build.cmd b/build-tools/windows/build.cmd
+index c9a8a9d984..1ab5295217 100644
+--- a/build-tools/windows/build.cmd
++++ b/build-tools/windows/build.cmd
+@@ -747,6 +747,66 @@ if NOT "%SVN_DIR%" == "" (
+     set "PATH=%PATH%;%SVN_DIR%"
+ )
+ 
++:: Check GCC/Clang version
++set GCC_VERSION_LINE=
++for /f "delims=" %%a in ('%MINGW_BIN_DIR%\g++ --version ^| find "g++"') do set GCC_VERSION_LINE=%%a
++if "%GCC_VERSION_LINE%" == "" (
++    for /f "delims=" %%a in ('%MINGW_BIN_DIR%\g++ --version ^| find "clang"') do set GCC_VERSION_LINE=%%a
++)
++if "%GCC_VERSION_LINE%" == "" (
++	echo ERROR: Failed to get version of g++. 1>&2
++	exit /B 1
++)
++set IS_CLANG=
++set IS_LLVM_MINGW=
++if not "%GCC_VERSION_LINE:clang=%" == "%GCC_VERSION_LINE%" (
++    echo Compiler looks like Clang
++    set IS_CLANG=1
++)
++if not x%IS_CLANG% == x (
++    rem Look for the multiarch target binary dirs. Unfortunately there is
++    rem no surefire way to detect a llvm-mingw toolchain.
++    if exist "%MINGW_BIN_DIR%\..\i686-w64-mingw32\bin\" (
++        if exist "%MINGW_BIN_DIR%\..\x86_64-w64-mingw32\bin\" (
++            echo Toolchain looks like llvm-mingw
++            set IS_LLVM_MINGW=1
++        )
++    )
++)
++if x%IS_LLVM_MINGW% == x goto skip_llvm_mingw_bin_check
++set OBJDUMP=
++for %%a in (objdump llvm-objdump) do (
++    %MINGW_BIN_DIR%\%%a --version > NUL
++    if not errorlevel 1 (
++        set OBJDUMP=%MINGW_BIN_DIR%\%%a
++    )
++)
++if "%OBJDUMP%" == "" (
++    echo ERROR: objdump is not working. 1>&2
++    exit /B 1
++)
++:: Check the compiler host platform architecture
++for /f "delims=, tokens=1" %%a in ('%OBJDUMP% -f %MINGW_BIN_DIR%\g++.exe ^| find "i386"') do set TARGET_ARCH_LINE=%%a
++if "%TARGET_ARCH_LINE%" == "" (
++    :: Possible LLVM objdump, trying to detect architecture...
++    for /f "delims=" %%a in ('%OBJDUMP% -f %MINGW_BIN_DIR%\g++.exe ^| find "coff"') do set TARGET_ARCH_LINE=%%a
++)
++if "%TARGET_ARCH_LINE:x86-64=%" == "%TARGET_ARCH_LINE%" (
++	echo Compiler host looks like x86
++	@REM set IS_X64=
++    set "LLVM_MINGW_MULTILIB_BIN_DIR=%MINGW_BIN_DIR%\..\i686-w64-mingw32\bin"
++) else (
++	echo Compiler host looks like x64
++	set "LLVM_MINGW_MULTILIB_BIN_DIR=%MINGW_BIN_DIR%\..\x86_64-w64-mingw32\bin"
++)
++echo.
++
++if NOT "%LLVM_MINGW_MULTILIB_BIN_DIR%" == "" (
++    set "PATH=%PATH%;%LLVM_MINGW_MULTILIB_BIN_DIR%"
++)
++
++:skip_llvm_mingw_bin_check
++
+ echo Creating dirs...
+ if NOT "%ARG_SKIP_DEPS%" == "1" (
+     mkdir %DEPS_DOWNLOAD_DIR%
+@@ -806,7 +866,12 @@ echo.
+ 
+ 
+ set CMAKE_BUILD_TYPE=RelWithDebInfo
+-set QT_ENABLE_DEBUG_INFO=OFF
++if "%QT_ENABLE_DEBUG_INFO%" == "" (
++    set QT_ENABLE_DEBUG_INFO=OFF
++)
++if "%QT_ENABLE_ASAN%" == "" (
++    set QT_ENABLE_ASAN=OFF
++)
+ 
+ set KRITA_GENERATOR=MinGW Makefiles
+ set KRITA_BUILD_TESTING=OFF
+@@ -861,6 +926,7 @@ if not "%GETTEXT_SEARCH_PATH%" == "" (
+ set CMDLINE_CMAKE_DEPS="%CMAKE_EXE%" "%KRITA_SRC_DIR%\3rdparty" ^
+     -DSUBMAKE_JOBS=%PARALLEL_JOBS% ^
+     -DQT_ENABLE_DEBUG_INFO=%QT_ENABLE_DEBUG_INFO% ^
++    -DQT_ENABLE_ASAN=%QT_ENABLE_ASAN% ^
+     -DQT_ENABLE_DYNAMIC_OPENGL=%QT_ENABLE_DYNAMIC_OPENGL% ^
+     -DPERL_EXECUTABLE=%PERL_EXECUTABLE% ^
+     -DEXTERNALS_DOWNLOAD_DIR=%BUILDDIR_DOWNLOAD_CMAKE% ^
+@@ -885,6 +951,7 @@ set CMDLINE_CMAKE_KRITA="%CMAKE_EXE%" "%KRITA_SRC_DIR%\." ^
+     -DBRANDING=%KRITA_BRANDING% ^
+     -Wno-dev ^
+     -G "%KRITA_GENERATOR%" ^
++    -DECM_ENABLE_SANITIZERS=%KRITA_ENABLE_SANITIZERS% ^
+     -DCMAKE_BUILD_TYPE=%CMAKE_BUILD_TYPE%
+ 
+ set CMDLINE_CMAKE_PLUGINS="%CMAKE_EXE%" "%KRITA_SRC_DIR%\3rdparty_plugins" ^
+diff --git a/packaging/windows/package-complete.cmd b/packaging/windows/package-complete.cmd
+index 4649faede1..9ba28fe7af 100644
+--- a/packaging/windows/package-complete.cmd
++++ b/packaging/windows/package-complete.cmd
+@@ -607,6 +607,7 @@ if not x%IS_TDM% == x (
+     ) else (
+         set "STDLIBS_DIR=%MINGW_BIN_DIR%\..\x86_64-w64-mingw32\bin"
+     )
++    set PATH=%PATH%;!STDLIBS_DIR!
+ ) else (    
+     if x%is_x64% == x (
+ 		:: mingw-w64 x86
