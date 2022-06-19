@@ -74,7 +74,14 @@ jobs:
       
       - name: Package Krita
         run: |
-          $package_suffix = git --git-dir "krita-src/.git" describe --dirty
+          $env:PATH = "C:\Program Files\Git\cmd;$env:PATH"
+          $env:MINGW_BIN_DIR = "$pwd\llvm-mingw-20220323-ucrt-x86_64\bin"
+          $env:NINJA_BIN_DIR = "$pwd\ninja"
+          # $env:PYTHON_BIN_DIR = "$pwd\python38"
+          $env:PATH = "$pwd\i\bin;$pwd\i\lib;$env:MINGW_BIN_DIR;$env:MINGW_BIN_DIR\..\x86_64-w64-mingw32\bin;$env:NINJA_BIN_DIR;$env:PATH"
+          # $env:VERBOSE = "1"
+          $package_suffix = git --git-dir "krita-src/.git" describe --dirty --always
+          $package_suffix += "-asan"
           krita-src\packaging\windows\package-complete.cmd --no-interactive --deps-install-dir "C:\krita-deps\i" --krita-install-dir "$pwd\i" --package-name "krita-$package_suffix"
           mkdir out
           mv "krita-$package_suffix.zip" out\
