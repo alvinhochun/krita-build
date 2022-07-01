@@ -22,8 +22,10 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Fetch deps
+        run: Invoke-WebRequest "https://github.com/alvinhochun/krita-build/releases/download/krita-deps-asan-20220619/krita-deps_asan.7z" -OutFile krita-deps.7z
+
+      - name: Extract deps
         run: |
-          Invoke-WebRequest "https://github.com/alvinhochun/krita-build/releases/download/krita-deps-asan-20220619/krita-deps_asan.7z" -OutFile krita-deps.7z
           mkdir C:\krita-deps
           mkdir C:\krita-deps\i
           compact /c C:\krita-deps\i
@@ -66,7 +68,7 @@ jobs:
           # $env:PYTHON_BIN_DIR = "$pwd\python38"
           $env:PATH = "$pwd\i\bin;$pwd\i\lib;$env:MINGW_BIN_DIR;$env:MINGW_BIN_DIR\..\x86_64-w64-mingw32\bin;$env:NINJA_BIN_DIR;$env:PATH"
           # $env:VERBOSE = "1"
-          $env:KRITA_ENABLE_SANITIZERS = "address;undefined -DKRITA_ENABLE_PCH=OFF"
+          $env:KRITA_ENABLE_SANITIZERS = "address;undefined"
           mkdir b_krita
           compact /c b_krita
           krita-src\build-tools\windows\build.cmd --no-interactive --skip-deps  --download-dir "$pwd\d" --deps-install-dir "C:\krita-deps\i" --krita-build-dir "$pwd\b_krita" --plugins-build-dir "C:\krita-b_plugins" --krita-install-dir "$pwd\i"

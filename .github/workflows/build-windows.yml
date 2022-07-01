@@ -109,11 +109,12 @@ jobs:
 
       - name: Extract deps
         run: |
-          mkdir i
-          compact /c i
-          7z x krita-deps.7z
+          mkdir C:\krita-deps
+          mkdir C:\krita-deps\i
+          compact /c C:\krita-deps\i
+          7z x krita-deps.7z -oC:\krita-deps\
           rm krita-deps.7z
-          if (!(Test-Path "$pwd\i")) { return 1 }
+          if (!(Test-Path "C:\krita-deps\i")) { return 1 }
 
       - uses: actions/setup-python@v4
         with:
@@ -153,13 +154,20 @@ jobs:
           $env:KRITA_ENABLE_SANITIZERS = "address;undefined"
           mkdir b_krita
           compact /c b_krita
-          krita-src\build-tools\windows\build.cmd --no-interactive --skip-deps  --download-dir "$pwd\d" --deps-install-dir "$pwd\i" --krita-build-dir "$pwd\b_krita" --plugins-build-dir "$pwd\b_plugins" --krita-install-dir "$pwd\i"
+          krita-src\build-tools\windows\build.cmd --no-interactive --skip-deps  --download-dir "$pwd\d" --deps-install-dir "C:\krita-deps\i" --krita-build-dir "$pwd\b_krita" --plugins-build-dir "C:\krita-b_plugins" --krita-install-dir "$pwd\i"
           rm -r -fo b_krita
       
       - name: Package Krita
         run: |
-          $package_suffix = git --git-dir "krita-src/.git" describe --dirty
-          krita-src\packaging\windows\package-complete.cmd --no-interactive --deps-install-dir "$pwd\i" --krita-install-dir "$pwd\i" --package-name "krita-$package_suffix"
+          $env:PATH = "C:\Program Files\Git\cmd;$env:PATH"
+          $env:MINGW_BIN_DIR = "$pwd\llvm-mingw-20220323-ucrt-x86_64\bin"
+          $env:NINJA_BIN_DIR = "$pwd\ninja"
+          # $env:PYTHON_BIN_DIR = "$pwd\python38"
+          $env:PATH = "$pwd\i\bin;$pwd\i\lib;$env:MINGW_BIN_DIR;$env:MINGW_BIN_DIR\..\x86_64-w64-mingw32\bin;$env:NINJA_BIN_DIR;$env:PATH"
+          # $env:VERBOSE = "1"
+          $package_suffix = git --git-dir "krita-src/.git" describe --dirty --always
+          $package_suffix += "-asan"
+          krita-src\packaging\windows\package-complete.cmd --no-interactive --deps-install-dir "C:\krita-deps\i" --krita-install-dir "$pwd\i" --package-name "krita-$package_suffix"
           mkdir out
           mv "krita-$package_suffix.zip" out\
           mv "krita-$package_suffix-dbg.zip" out\
