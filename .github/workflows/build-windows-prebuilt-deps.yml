@@ -46,6 +46,7 @@ jobs:
           7z x llvm-mingw-20220323-ucrt-x86_64.zip
           rm llvm-mingw-20220323-ucrt-x86_64.zip
           if (!(Test-Path "$pwd\llvm-mingw-20220323-ucrt-x86_64\bin\clang++.exe")) { return 1 }
+          cp llvm-mingw-20220323-ucrt-x86_64\x86_64-w64-mingw32\bin\libclang_rt.asan_dynamic-x86_64.dll C:\krita-deps\i\bin\
 
       - name: Install Ninja
         run: |
@@ -60,7 +61,7 @@ jobs:
           cd krita-src
           git apply ..\sanitizers.patch
 
-      - name: Build deps
+      - name: Build krita
         run: |
           $env:PATH = "C:\Program Files\Git\cmd;$env:PATH"
           $env:MINGW_BIN_DIR = "$pwd\llvm-mingw-20220323-ucrt-x86_64\bin"
