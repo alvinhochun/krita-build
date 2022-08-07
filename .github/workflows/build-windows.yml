@@ -74,9 +74,9 @@ jobs:
           # Invoke-WebRequest "https://downloads.sourceforge.net/project/giflib/giflib-5.2.1.tar.gz" -UserAgent "Wget/1.21.1" -OutFile "d\giflib-5.2.1.tar.gz"
           # Invoke-WebRequest "https://downloads.sourceforge.net/project/lcms/lcms/2.13/lcms2-2.13.1.tar.gz" -UserAgent "Wget/1.21.1" -OutFile "d\lcms2-2.13.1.tar.gz"
           # Invoke-WebRequest "https://download.sourceforge.net/libpng/libpng-1.6.37.tar.gz" -UserAgent "Wget/1.21.1" -OutFile "d\libpng-1.6.37.tar.gz"
-          Invoke-WebRequest "https://nchc.dl.sourceforge.net/project/giflib/giflib-5.2.1.tar.gz" -UserAgent "Wget/1.21.1" -OutFile "d\giflib-5.2.1.tar.gz"
-          Invoke-WebRequest "https://nchc.dl.sourceforge.net/project/lcms/lcms/2.13/lcms2-2.13.1.tar.gz" -UserAgent "Wget/1.21.1" -OutFile "d\lcms2-2.13.1.tar.gz"
-          Invoke-WebRequest "https://nchc.dl.sourceforge.net/project/libpng/libpng-1.6.37.tar.gz" -UserAgent "Wget/1.21.1" -OutFile "d\libpng-1.6.37.tar.gz"
+          Invoke-WebRequest "https://github.com/alvinhochun/krita-build/releases/download/krita-deps-asan-20220619/giflib-5.2.1.tar.gz" -UserAgent "Wget/1.21.1" -OutFile "d\giflib-5.2.1.tar.gz"
+          Invoke-WebRequest "https://github.com/alvinhochun/krita-build/releases/download/krita-deps-asan-20220619/lcms2-2.13.1.tar.gz" -UserAgent "Wget/1.21.1" -OutFile "d\lcms2-2.13.1.tar.gz"
+          Invoke-WebRequest "https://github.com/alvinhochun/krita-build/releases/download/krita-deps-asan-20220619/libpng-1.6.37.tar.gz" -UserAgent "Wget/1.21.1" -OutFile "d\libpng-1.6.37.tar.gz"
 
       - name: Build deps
         run: |
