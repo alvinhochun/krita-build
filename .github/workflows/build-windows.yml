@@ -71,9 +71,9 @@ jobs:
       - name: Pre-download some deps from sourceforge
         run: |
           mkdir d
-          Invoke-WebRequest "https://downloads.sourceforge.net/project/giflib/giflib-5.2.1.tar.gz" -OutFile "d\giflib-5.2.1.tar.gz"
-          Invoke-WebRequest "https://downloads.sourceforge.net/project/lcms/lcms/2.13/lcms2-2.13.1.tar.gz" -OutFile "d\lcms2-2.13.1.tar.gz"
-          Invoke-WebRequest "https://download.sourceforge.net/libpng/libpng-1.6.37.tar.gz" -OutFile "d\libpng-1.6.37.tar.gz"
+          Invoke-WebRequest "https://downloads.sourceforge.net/project/giflib/giflib-5.2.1.tar.gz" -UserAgent "Wget/1.21.1" -OutFile "d\giflib-5.2.1.tar.gz"
+          Invoke-WebRequest "https://downloads.sourceforge.net/project/lcms/lcms/2.13/lcms2-2.13.1.tar.gz" -UserAgent "Wget/1.21.1" -OutFile "d\lcms2-2.13.1.tar.gz"
+          Invoke-WebRequest "https://download.sourceforge.net/libpng/libpng-1.6.37.tar.gz" -UserAgent "Wget/1.21.1" -OutFile "d\libpng-1.6.37.tar.gz"
 
       - name: Build deps
         run: |
