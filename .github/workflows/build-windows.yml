@@ -80,6 +80,8 @@ jobs:
           mkdir b_deps
           mkdir i
           compact /c b_deps i
+          mkdir i\bin
+          cp llvm-mingw-20220323-ucrt-x86_64\x86_64-w64-mingw32\bin\libclang_rt.asan_dynamic-x86_64.dll i\bin\
           krita-src\build-tools\windows\build.cmd --no-interactive --skip-krita --download-dir "$pwd\d" --deps-build-dir "$pwd\b_deps" --deps-install-dir "$pwd\i"
           rm -r -fo d
           rm -r -fo b_deps
