@@ -1,4 +1,4 @@
-name: Windows Build using prebuilt deps
+name: Windows ASAN Build using prebuilt deps (krita)
 
 # Controls when the workflow will run
 on:
