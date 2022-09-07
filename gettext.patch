@@ -1,17 +1,45 @@
-diff --git a/3rdparty/ext_gettext/0004-vcpkg-CMake-toolchain.patch b/3rdparty/ext_gettext/0004-vcpkg-CMake-toolchain.patch
-index 63a9dc7de8..190a575f81 100644
---- a/3rdparty/ext_gettext/0004-vcpkg-CMake-toolchain.patch
-+++ b/3rdparty/ext_gettext/0004-vcpkg-CMake-toolchain.patch
-@@ -1454,10 +1454,10 @@ index 0000000..1093a7f
- +/* #undef HAVE_GETUID */
- +
- +/* Define if you have the iconv() function and it works. */
--+/* #undef HAVE_ICONV */
-++#define HAVE_ICONV 1
- +
- +/* Define to 1 if you have the <iconv.h> header file. */
--+/* #undef HAVE_ICONV_H */
-++#define HAVE_ICONV_H 1
- +
- +/* Define if your compiler supports the #include_next directive. */
- +/* #undef HAVE_INCLUDE_NEXT */
+diff --git a/3rdparty/ext_gettext/0005-win-Fix-missing-declarations-from-wchar.h.patch b/3rdparty/ext_gettext/0005-win-Fix-missing-declarations-from-wchar.h.patch
+new file mode 100644
+index 0000000000..4c98350104
+--- /dev/null
++++ b/3rdparty/ext_gettext/0005-win-Fix-missing-declarations-from-wchar.h.patch
+@@ -0,0 +1,27 @@
++From 5d4d0937bc75646237952447fdb4cfdb2e8a5137 Mon Sep 17 00:00:00 2001
++From: Alvin Wong <alvinhochun@gmail.com>
++Date: Wed, 7 Sep 2022 19:00:22 +0800
++Subject: [PATCH] win: Fix missing declarations from wchar.h
++
++---
++ gettext-runtime/intl/gettextP.h | 4 ++++
++ 1 file changed, 4 insertions(+)
++
++diff --git a/gettext-runtime/intl/gettextP.h b/gettext-runtime/intl/gettextP.h
++index 1efeb192c..b05c20bf3 100644
++--- a/gettext-runtime/intl/gettextP.h
+++++ b/gettext-runtime/intl/gettextP.h
++@@ -36,6 +36,10 @@
++ # include "lock.h"
++ #endif
++ 
+++#if defined _WIN32 && !defined __CYGWIN__
+++# include <wchar.h>
+++#endif
+++
++ #ifdef _LIBC
++ struct loaded_domain;
++ extern char *__gettext (const char *__msgid);
++-- 
++2.37.1
++
+diff --git a/3rdparty/ext_gettext/CMakeLists.txt b/3rdparty/ext_gettext/CMakeLists.txt
+index 56ba7f21e5..d8d10a6401 100644
+--- a/3rdparty/ext_gettext/CMakeLists.txt
++++ b/3rdparty/ext_gettext/CMakeLists.txt
+@@ -37,6 +37,7 @@ if (WIN32)
+             COMMAND ${PATCH_COMMAND} --binary -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/0002-Fix-uwp-build.patch
+             COMMAND ${PATCH_COMMAND} --binary -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/0003-Fix-win-unicode-paths.patch
+             COMMAND ${PATCH_COMMAND} --binary -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/0004-vcpkg-CMake-toolchain.patch
++            COMMAND ${PATCH_COMMAND} --binary -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/0005-win-Fix-missing-declarations-from-wchar.h.patch
+         INSTALL_DIR ${PREFIX_ext_gettext}
+         CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${PREFIX_ext_gettext} -DCMAKE_BUILD_TYPE=${GLOBAL_BUILD_TYPE} ${GLOBAL_PROFILE}
+         UPDATE_COMMAND ""
