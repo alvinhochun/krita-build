@@ -58,6 +58,7 @@ jobs:
           cd krita-src
           git apply ..\sanitizers.patch
           git apply ..\gettext.patch
+          git apply ..\icoutils.patch
           git apply ..\cleanup.patch
 
       # - name: test
