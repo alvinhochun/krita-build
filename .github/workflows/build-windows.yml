@@ -57,6 +57,7 @@ jobs:
           git clone --depth=1 -b master https://invent.kde.org/graphics/krita.git krita-src
           cd krita-src
           git apply ..\sanitizers.patch
+          git apply ..\gettext.patch
           git apply ..\cleanup.patch
 
       # - name: test
