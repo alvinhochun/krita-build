@@ -2,10 +2,11 @@ diff --git a/build-tools/windows/build.cmd b/build-tools/windows/build.cmd
 index ddb1626f31..8ed3067e9b 100644
 --- a/build-tools/windows/build.cmd
 +++ b/build-tools/windows/build.cmd
-@@ -1039,6 +1039,8 @@ for %%a in (%EXT_TARGETS%) do (
+@@ -1039,6 +1039,9 @@ for %%a in (%EXT_TARGETS%) do (
      ) else (
          echo Skipping ext_%%a, using OS package...
      )
++    if ERRORLEVEL 1 exit
 +    if "%%a" == "boost" del /s /q ext_boost\ext_boost-prefix\src\ext_boost
 +    if "%%a" == "qt" del /s /q ext_qt\b ext_qt\s
  )
