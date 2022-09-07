@@ -1,68 +1,45 @@
-diff --git a/3rdparty/ext_icoutils/0003-common-hmap-Add-prototype-args-to-function-pointer.patch b/3rdparty/ext_icoutils/0003-common-hmap-Add-prototype-args-to-function-pointer.patch
+diff --git a/3rdparty/ext_gettext/0005-win-Fix-missing-declarations-from-wchar.h.patch b/3rdparty/ext_gettext/0005-win-Fix-missing-declarations-from-wchar.h.patch
 new file mode 100644
-index 0000000000..9f4ee0baf8
+index 0000000000..4c98350104
 --- /dev/null
-+++ b/3rdparty/ext_icoutils/0003-common-hmap-Add-prototype-args-to-function-pointer.patch
-@@ -0,0 +1,50 @@
-+From 978fde75f7161a6486491f24cee876a3988cb98f Mon Sep 17 00:00:00 2001
++++ b/3rdparty/ext_gettext/0005-win-Fix-missing-declarations-from-wchar.h.patch
+@@ -0,0 +1,27 @@
++From 5d4d0937bc75646237952447fdb4cfdb2e8a5137 Mon Sep 17 00:00:00 2001
 +From: Alvin Wong <alvinhochun@gmail.com>
-+Date: Wed, 7 Sep 2022 20:30:32 +0800
-+Subject: [PATCH] common/hmap: Add prototype args to function pointer
++Date: Wed, 7 Sep 2022 19:00:22 +0800
++Subject: [PATCH] win: Fix missing declarations from wchar.h
 +
 +---
-+ common/hmap.c | 4 ++--
-+ common/hmap.h | 4 ++--
-+ 2 files changed, 4 insertions(+), 4 deletions(-)
++ gettext-runtime/intl/gettextP.h | 4 ++++
++ 1 file changed, 4 insertions(+)
 +
-+diff --git a/common/hmap.c b/common/hmap.c
-+index 9c5d657..8b77205 100644
-+--- a/common/hmap.c
-++++ b/common/hmap.c
-+@@ -363,7 +363,7 @@ hmap_iterator(HMap *map, HMapIterator *it)
-+  * function. But no other entry.
-+  */
-+ void
-+-hmap_foreach_value(HMap *map, void (*iterator)())
-++hmap_foreach_value(HMap *map, void (*iterator)(void *))
-+ {
-+     uint32_t c;
++diff --git a/gettext-runtime/intl/gettextP.h b/gettext-runtime/intl/gettextP.h
++index 1efeb192c..b05c20bf3 100644
++--- a/gettext-runtime/intl/gettextP.h
+++++ b/gettext-runtime/intl/gettextP.h
++@@ -36,6 +36,10 @@
++ # include "lock.h"
++ #endif
 + 
-+@@ -378,7 +378,7 @@ hmap_foreach_value(HMap *map, void (*iterator)())
-+ }
-+ 
-+ void
-+-hmap_foreach_key(HMap *map, void (*iterator)())
-++hmap_foreach_key(HMap *map, void (*iterator)(void *))
-+ {
-+     uint32_t c;
-+ 
-+diff --git a/common/hmap.h b/common/hmap.h
-+index bf6684b..a124b53 100644
-+--- a/common/hmap.h
-++++ b/common/hmap.h
-+@@ -50,8 +50,8 @@ void *hmap_put(HMap *map, void *key, void *value);
-+ bool hmap_contains_key(HMap *map, const void *key);
-+ void *hmap_remove(HMap *map, const void *key);
-+ void hmap_iterator(HMap *map, HMapIterator *it);
-+-void hmap_foreach_key(HMap *map, void (*iterator)());
-+-void hmap_foreach_value(HMap *map, void (*iterator)());
-++void hmap_foreach_key(HMap *map, void (*iterator)(void *));
-++void hmap_foreach_value(HMap *map, void (*iterator)(void *));
-+ void hmap_clear(HMap *map);
-+ size_t hmap_size(HMap *map);
-+ void hmap_set_hash_fn(HMap *map, hash_fn_t hash);
+++#if defined _WIN32 && !defined __CYGWIN__
+++# include <wchar.h>
+++#endif
+++
++ #ifdef _LIBC
++ struct loaded_domain;
++ extern char *__gettext (const char *__msgid);
 +-- 
-+2.24.1.windows.2
++2.37.1
 +
-diff --git a/3rdparty/ext_icoutils/CMakeLists.txt b/3rdparty/ext_icoutils/CMakeLists.txt
-index 67608bf5a9..3943195e8a 100644
---- a/3rdparty/ext_icoutils/CMakeLists.txt
-+++ b/3rdparty/ext_icoutils/CMakeLists.txt
-@@ -10,6 +10,7 @@ if (MINGW)
- 
-         PATCH_COMMAND ${PATCH_COMMAND} -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/0001-Really-do-not-include-libintl.h.patch
-               COMMAND ${PATCH_COMMAND} -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/0002-CMake-to-build-icotool.exe.patch
-+              COMMAND ${PATCH_COMMAND} -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/0003-common-hmap-Add-prototype-args-to-function-pointer.patch
-         CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${PREFIX_ext_icoutils} -DCMAKE_BUILD_TYPE=${GLOBAL_BUILD_TYPE} ${GLOBAL_PROFILE}
- 
-         DEPENDS ext_png
+diff --git a/3rdparty/ext_gettext/CMakeLists.txt b/3rdparty/ext_gettext/CMakeLists.txt
+index 56ba7f21e5..d8d10a6401 100644
+--- a/3rdparty/ext_gettext/CMakeLists.txt
++++ b/3rdparty/ext_gettext/CMakeLists.txt
+@@ -37,6 +37,7 @@ if (WIN32)
+             COMMAND ${PATCH_COMMAND} --binary -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/0002-Fix-uwp-build.patch
+             COMMAND ${PATCH_COMMAND} --binary -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/0003-Fix-win-unicode-paths.patch
+             COMMAND ${PATCH_COMMAND} --binary -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/0004-vcpkg-CMake-toolchain.patch
++            COMMAND ${PATCH_COMMAND} --binary -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/0005-win-Fix-missing-declarations-from-wchar.h.patch
+         INSTALL_DIR ${PREFIX_ext_gettext}
+         CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${PREFIX_ext_gettext} -DCMAKE_BUILD_TYPE=${GLOBAL_BUILD_TYPE} ${GLOBAL_PROFILE}
+         UPDATE_COMMAND ""
