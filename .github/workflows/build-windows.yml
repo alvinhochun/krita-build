@@ -32,12 +32,12 @@ jobs:
 
       - name: Install compiler
         run: |
-          Invoke-WebRequest "https://github.com/mstorsjo/llvm-mingw/releases/download/20220323/llvm-mingw-20220323-ucrt-x86_64.zip" -OutFile llvm-mingw-20220323-ucrt-x86_64.zip
-          mkdir llvm-mingw-20220323-ucrt-x86_64
-          compact /c llvm-mingw-20220323-ucrt-x86_64
-          7z x llvm-mingw-20220323-ucrt-x86_64.zip
-          rm llvm-mingw-20220323-ucrt-x86_64.zip
-          if (!(Test-Path "$pwd\llvm-mingw-20220323-ucrt-x86_64\bin\clang++.exe")) { return 1 }
+          Invoke-WebRequest "https://github.com/mstorsjo/llvm-mingw/releases/download/20220906/llvm-mingw-20220906-ucrt-x86_64.zip" -OutFile llvm-mingw.zip
+          mkdir llvm-mingw-20220906-ucrt-x86_64
+          compact /c llvm-mingw-20220906-ucrt-x86_64
+          7z x llvm-mingw.zip
+          rm llvm-mingw.zip
+          if (!(Test-Path "$pwd\llvm-mingw-20220906-ucrt-x86_64\bin\clang++.exe")) { return 1 }
 
       - name: Install Ninja
         run: |
@@ -81,7 +81,7 @@ jobs:
       - name: Build deps
         run: |
           $env:PATH = "C:\Program Files\Git\cmd;$env:PATH"
-          $env:MINGW_BIN_DIR = "$pwd\llvm-mingw-20220323-ucrt-x86_64\bin"
+          $env:MINGW_BIN_DIR = "$pwd\llvm-mingw-20220906-ucrt-x86_64\bin"
           $env:NINJA_BIN_DIR = "$pwd\ninja"
           # $env:PYTHON_BIN_DIR = "$pwd\python38"
           $env:PATH = "$pwd\i\bin;$pwd\i\lib;$env:MINGW_BIN_DIR;$env:MINGW_BIN_DIR\..\x86_64-w64-mingw32\bin;$env:NINJA_BIN_DIR;$env:PATH"
@@ -91,7 +91,7 @@ jobs:
           mkdir i
           compact /c b_deps i
           mkdir i\bin
-          cp llvm-mingw-20220323-ucrt-x86_64\x86_64-w64-mingw32\bin\libclang_rt.asan_dynamic-x86_64.dll i\bin\
+          cp llvm-mingw-20220906-ucrt-x86_64\x86_64-w64-mingw32\bin\libclang_rt.asan_dynamic-x86_64.dll i\bin\
           krita-src\build-tools\windows\build.cmd --no-interactive --skip-krita --download-dir "$pwd\d" --deps-build-dir "$pwd\b_deps" --deps-install-dir "$pwd\i"
           rm -r -fo d
           rm -r -fo b_deps
@@ -135,13 +135,13 @@ jobs:
 
       - name: Install compiler
         run: |
-          Invoke-WebRequest "https://github.com/mstorsjo/llvm-mingw/releases/download/20220323/llvm-mingw-20220323-ucrt-x86_64.zip" -OutFile llvm-mingw-20220323-ucrt-x86_64.zip
-          mkdir llvm-mingw-20220323-ucrt-x86_64
-          compact /c llvm-mingw-20220323-ucrt-x86_64
-          7z x llvm-mingw-20220323-ucrt-x86_64.zip
-          rm llvm-mingw-20220323-ucrt-x86_64.zip
-          if (!(Test-Path "$pwd\llvm-mingw-20220323-ucrt-x86_64\bin\clang++.exe")) { return 1 }
-          cp llvm-mingw-20220323-ucrt-x86_64\x86_64-w64-mingw32\bin\libclang_rt.asan_dynamic-x86_64.dll C:\krita-deps\i\bin\
+          Invoke-WebRequest "https://github.com/mstorsjo/llvm-mingw/releases/download/20220906/llvm-mingw-20220906-ucrt-x86_64.zip" -OutFile llvm-mingw.zip
+          mkdir llvm-mingw-20220906-ucrt-x86_64
+          compact /c llvm-mingw-20220906-ucrt-x86_64
+          7z x llvm-mingw.zip
+          rm llvm-mingw.zip
+          if (!(Test-Path "$pwd\llvm-mingw-20220906-ucrt-x86_64\bin\clang++.exe")) { return 1 }
+          cp llvm-mingw-20220906-ucrt-x86_64\x86_64-w64-mingw32\bin\libclang_rt.asan_dynamic-x86_64.dll C:\krita-deps\i\bin\
 
       - name: Install Ninja
         run: |
@@ -159,7 +159,7 @@ jobs:
       - name: Build krita
         run: |
           $env:PATH = "C:\Program Files\Git\cmd;$env:PATH"
-          $env:MINGW_BIN_DIR = "$pwd\llvm-mingw-20220323-ucrt-x86_64\bin"
+          $env:MINGW_BIN_DIR = "$pwd\llvm-mingw-20220906-ucrt-x86_64\bin"
           $env:NINJA_BIN_DIR = "$pwd\ninja"
           # $env:PYTHON_BIN_DIR = "$pwd\python38"
           $env:PATH = "$pwd\i\bin;$pwd\i\lib;$env:MINGW_BIN_DIR;$env:MINGW_BIN_DIR\..\x86_64-w64-mingw32\bin;$env:NINJA_BIN_DIR;$env:PATH"
@@ -173,7 +173,7 @@ jobs:
       - name: Package Krita
         run: |
           $env:PATH = "C:\Program Files\Git\cmd;$env:PATH"
-          $env:MINGW_BIN_DIR = "$pwd\llvm-mingw-20220323-ucrt-x86_64\bin"
+          $env:MINGW_BIN_DIR = "$pwd\llvm-mingw-20220906-ucrt-x86_64\bin"
           $env:NINJA_BIN_DIR = "$pwd\ninja"
           # $env:PYTHON_BIN_DIR = "$pwd\python38"
           $env:PATH = "$pwd\i\bin;$pwd\i\lib;$env:MINGW_BIN_DIR;$env:MINGW_BIN_DIR\..\x86_64-w64-mingw32\bin;$env:NINJA_BIN_DIR;$env:PATH"
