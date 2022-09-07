@@ -1,0 +1,17 @@
+diff --git a/3rdparty/ext_gettext/0004-vcpkg-CMake-toolchain.patch b/3rdparty/ext_gettext/0004-vcpkg-CMake-toolchain.patch
+index 63a9dc7de8..190a575f81 100644
+--- a/3rdparty/ext_gettext/0004-vcpkg-CMake-toolchain.patch
++++ b/3rdparty/ext_gettext/0004-vcpkg-CMake-toolchain.patch
+@@ -1454,10 +1454,10 @@ index 0000000..1093a7f
+ +/* #undef HAVE_GETUID */
+ +
+ +/* Define if you have the iconv() function and it works. */
+-+/* #undef HAVE_ICONV */
+++#define HAVE_ICONV 1
+ +
+ +/* Define to 1 if you have the <iconv.h> header file. */
+-+/* #undef HAVE_ICONV_H */
+++#define HAVE_ICONV_H 1
+ +
+ +/* Define if your compiler supports the #include_next directive. */
+ +/* #undef HAVE_INCLUDE_NEXT */
