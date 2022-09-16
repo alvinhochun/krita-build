@@ -48,7 +48,7 @@ index c679134d0f..ff99dfba61 100644
          INTERFACE_INCLUDE_DIRECTORIES "${LibExiv2_INCLUDE_DIRS}"
      )
 +    # Workaround for libc++ when compiling Krita with -std=c++!7
-+    target_compile_definitions(LibExiv2::LibEXiv2
++    target_compile_definitions(LibExiv2::LibExiv2
 +        INTERFACE -D_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR
 +    )
  endif()
