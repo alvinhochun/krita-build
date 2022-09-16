@@ -86,7 +86,7 @@ jobs:
           $env:PATH = "$pwd\i\bin;$pwd\i\lib;$env:MINGW_BIN_DIR;$env:MINGW_BIN_DIR\..\x86_64-w64-mingw32\bin;$env:NINJA_BIN_DIR;$env:PATH"
           $env:CFLAGS = "-mguard=cf"
           $env:CXXFLAGS = "-mguard=cf"
-          $env:LDFLAGS = "=mguard=cf"
+          $env:LDFLAGS = "-mguard=cf"
           # $env:VERBOSE = "1"
           $env:QT_ENABLE_ASAN = "ON"
           mkdir b_deps
@@ -163,7 +163,7 @@ jobs:
           $env:KRITA_ENABLE_SANITIZERS = "address;undefined"
           $env:CFLAGS = "-mguard=cf"
           $env:CXXFLAGS = "-mguard=cf"
-          $env:LDFLAGS = "=mguard=cf"
+          $env:LDFLAGS = "-mguard=cf"
           mkdir b_krita
           compact /c b_krita
           cmd /c krita-src\build-tools\windows\build.cmd --no-interactive --skip-deps  --download-dir "$pwd\d" --deps-install-dir "C:\krita-deps\i" --krita-build-dir "$pwd\b_krita" --plugins-build-dir "C:\krita-b_plugins" --krita-install-dir "$pwd\i"
