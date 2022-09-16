@@ -1,0 +1,58 @@
+From ac726c7356e62b358b977951388a8d03f296633f Mon Sep 17 00:00:00 2001
+From: Alvin Wong <alvin@alvinhc.com>
+Date: Fri, 16 Sep 2022 20:42:14 +0800
+Subject: [PATCH] exiv2: Work around build errors with c++17
+
+---
+ 3rdparty/ext_exiv2/CMakeLists.txt | 6 +++---
+ cmake/modules/FindLibExiv2.cmake  | 4 ++++
+ 2 files changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/3rdparty/ext_exiv2/CMakeLists.txt b/3rdparty/ext_exiv2/CMakeLists.txt
+index 0ed02e5789..266b077f60 100644
+--- a/3rdparty/ext_exiv2/CMakeLists.txt
++++ b/3rdparty/ext_exiv2/CMakeLists.txt
+@@ -7,7 +7,7 @@ if (ANDROID)
+         URL_HASH SHA256=35a58618ab236a901ca4928b0ad8b31007ebdc0386d904409d825024e45ea6e2
+ 
+         INSTALL_DIR ${PREFIX_ext_exiv2}
+-        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${PREFIX_ext_exiv2} -DCMAKE_BUILD_TYPE=${GLOBAL_BUILD_TYPE} ${GLOBAL_PROFILE} -DEXIV2_BUILD_SAMPLES=OFF -DICONV_LIBRARY=${PREFIX_ext_exiv2}/lib -DEXIV2_ENABLE_NLS=OFF -DICONV_INCLUDE_DIR=${PREFIX_ext_exiv2}/include -DEXPAT_LIBRARY=$ENV{BUILD_ROOT}/i/lib/libexpat.so -DEXPAT_INCLUDE_DIR=$ENV{BUILD_ROOT}/i/include -DEXIV2_BUILD_EXIV2_COMMAND=OFF
++        CMAKE_ARGS -DCMAKE_CXX_STANDARD=14 -DCMAKE_INSTALL_PREFIX=${PREFIX_ext_exiv2} -DCMAKE_BUILD_TYPE=${GLOBAL_BUILD_TYPE} ${GLOBAL_PROFILE} -DEXIV2_BUILD_SAMPLES=OFF -DICONV_LIBRARY=${PREFIX_ext_exiv2}/lib -DEXIV2_ENABLE_NLS=OFF -DICONV_INCLUDE_DIR=${PREFIX_ext_exiv2}/include -DEXPAT_LIBRARY=$ENV{BUILD_ROOT}/i/lib/libexpat.so -DEXPAT_INCLUDE_DIR=$ENV{BUILD_ROOT}/i/include -DEXIV2_BUILD_EXIV2_COMMAND=OFF
+         UPDATE_COMMAND ""
+         DEPENDS ext_expat
+     )
+@@ -33,7 +33,7 @@ elseif(WIN32)
+         PATCH_COMMAND ${WINDOWS_PATCH_COMMAND}
+ 
+         INSTALL_DIR ${PREFIX_ext_exiv2}
+-        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${PREFIX_ext_exiv2} -DCMAKE_LIBRARY_PATH=${PREFIX_ext_exiv2}/lib -DCMAKE_BUILD_TYPE=${GLOBAL_BUILD_TYPE} ${GLOBAL_PROFILE} -DEXIV2_BUILD_SAMPLES=OFF -DIconv_INCLUDE_DIR=${PREFIX_ext_exiv2}/include -DEXIV2_ENABLE_NLS=OFF -DEXIV2_BUILD_EXIV2_COMMAND=OFF
++        CMAKE_ARGS -DCMAKE_CXX_STANDARD=14 -DCMAKE_INSTALL_PREFIX=${PREFIX_ext_exiv2} -DCMAKE_LIBRARY_PATH=${PREFIX_ext_exiv2}/lib -DCMAKE_BUILD_TYPE=${GLOBAL_BUILD_TYPE} ${GLOBAL_PROFILE} -DEXIV2_BUILD_SAMPLES=OFF -DIconv_INCLUDE_DIR=${PREFIX_ext_exiv2}/include -DEXIV2_ENABLE_NLS=OFF -DEXIV2_BUILD_EXIV2_COMMAND=OFF
+ 
+         UPDATE_COMMAND ""
+         DEPENDS ${ICONV_DEP} ${EXPAT_DEP} ${ZLIB_DEP}
+@@ -46,7 +46,7 @@ else()
+         URL_HASH SHA256=35a58618ab236a901ca4928b0ad8b31007ebdc0386d904409d825024e45ea6e2
+ 
+         INSTALL_DIR ${PREFIX_ext_exiv2}
+-        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${PREFIX_ext_exiv2} -DCMAKE_LIBRARY_PATH=${PREFIX_ext_exiv2}/lib -DCMAKE_BUILD_TYPE=${GLOBAL_BUILD_TYPE} ${GLOBAL_PROFILE} -DEXIV2_BUILD_SAMPLES=OFF -DIconv_INCLUDE_DIR=${PREFIX_ext_exiv2}/include -DEXIV2_ENABLE_NLS=OFF -DEXIV2_BUILD_EXIV2_COMMAND=OFF
++        CMAKE_ARGS -DCMAKE_CXX_STANDARD=14 -DCMAKE_INSTALL_PREFIX=${PREFIX_ext_exiv2} -DCMAKE_LIBRARY_PATH=${PREFIX_ext_exiv2}/lib -DCMAKE_BUILD_TYPE=${GLOBAL_BUILD_TYPE} ${GLOBAL_PROFILE} -DEXIV2_BUILD_SAMPLES=OFF -DIconv_INCLUDE_DIR=${PREFIX_ext_exiv2}/include -DEXIV2_ENABLE_NLS=OFF -DEXIV2_BUILD_EXIV2_COMMAND=OFF
+ 
+         UPDATE_COMMAND ""
+         DEPENDS ext_iconv ext_expat
+diff --git a/cmake/modules/FindLibExiv2.cmake b/cmake/modules/FindLibExiv2.cmake
+index c679134d0f..ff99dfba61 100644
+--- a/cmake/modules/FindLibExiv2.cmake
++++ b/cmake/modules/FindLibExiv2.cmake
+@@ -89,6 +89,10 @@ if(LibExiv2_FOUND AND NOT TARGET LibExiv2::LibExiv2)
+         IMPORTED_LOCATION "${LibExiv2_LIBRARIES}"
+         INTERFACE_INCLUDE_DIRECTORIES "${LibExiv2_INCLUDE_DIRS}"
+     )
++    # Workaround for libc++ when compiling Krita with -std=c++!7
++    target_compile_definitions(LibExiv2::LibEXiv2
++        INTERFACE -D_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR
++    )
+ endif()
+ 
+ include(FeatureSummary)
+-- 
+2.37.1
