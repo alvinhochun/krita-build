@@ -58,6 +58,7 @@ jobs:
           #git apply ..\sanitizers.patch
           #git apply ..\gettext.patch
           #git apply ..\icoutils.patch
+          git apply ..\exiv2-cxx17.patch
           git apply ..\cleanup.patch
       # - name: test
       #   run: |
