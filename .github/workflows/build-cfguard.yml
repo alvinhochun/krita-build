@@ -59,6 +59,7 @@ jobs:
           #git apply ..\gettext.patch
           #git apply ..\icoutils.patch
           git apply ..\exiv2-cxx17.patch
+          git apply ..\qt-cfguard.patch
           git apply ..\cleanup.patch
       # - name: test
       #   run: |
