@@ -1,0 +1,17 @@
+diff --git a/3rdparty/ext_qt/CMakeLists.txt b/3rdparty/ext_qt/CMakeLists.txt
+index 0632cdaf10..b30fa9a49a 100644
+--- a/3rdparty/ext_qt/CMakeLists.txt
++++ b/3rdparty/ext_qt/CMakeLists.txt
+@@ -55,6 +55,12 @@ if (WIN32)
+         QMAKE_LFLAGS_APP+=${SECURITY_EXE_LINKER_FLAGS}
+         QMAKE_LFLAGS_SHLIB+=${SECURITY_SHARED_LINKER_FLAGS}
+         QMAKE_LFLAGS_SONAME+=${SECURITY_SHARED_LINKER_FLAGS}
++        #
++        QMAKE_CFLAGS+=-mguard=cf
++        QMAKE_CXXFLAGS+=-mguard=cf
++        QMAKE_LFLAGS_APP+=-mguard=cf
++        QMAKE_LFLAGS_SHLIB+=-mguard=cf
++        QMAKE_LFLAGS_SONAME+=-mguard=cf
+     )
+     if (MSVC)
+       list(APPEND _QT_conf
