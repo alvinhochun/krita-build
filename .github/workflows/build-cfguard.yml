@@ -33,12 +33,12 @@ jobs:
 
       - name: Install compiler
         run: |
-          Invoke-WebRequest "https://github.com/alvinhochun/llvm-mingw/releases/download/20220915-cfguard/llvm-mingw-x86_64-20220915-cfguard.zip" -OutFile llvm-mingw.zip
-          mkdir llvm-mingw-x86_64-20220915-cfguard
-          compact /c llvm-mingw-x86_64-20220915-cfguard
+          Invoke-WebRequest "https://github.com/alvinhochun/llvm-mingw/releases/download/20220923-cfguard/llvm-mingw-x86_64-20220923-cfguard.zip" -OutFile llvm-mingw.zip
+          mkdir llvm-mingw-x86_64-20220923-cfguard
+          compact /c llvm-mingw-x86_64-20220923-cfguard
           7z x llvm-mingw.zip
           rm llvm-mingw.zip
-          if (!(Test-Path "$pwd\llvm-mingw-x86_64-20220915-cfguard\bin\clang++.exe")) { return 1 }
+          if (!(Test-Path "$pwd\llvm-mingw-x86_64-20220923-cfguard\bin\clang++.exe")) { return 1 }
       - name: Install Ninja
         run: |
           Invoke-WebRequest "https://github.com/ninja-build/ninja/releases/download/v1.11.0/ninja-win.zip" -OutFile ninja-win.zip
@@ -83,7 +83,7 @@ jobs:
       - name: Build deps
         run: |
           $env:PATH = "C:\Program Files\Git\cmd;$env:PATH"
-          $env:MINGW_BIN_DIR = "$pwd\llvm-mingw-x86_64-20220915-cfguard\bin"
+          $env:MINGW_BIN_DIR = "$pwd\llvm-mingw-x86_64-20220923-cfguard\bin"
           $env:NINJA_BIN_DIR = "$pwd\ninja"
           # $env:PYTHON_BIN_DIR = "$pwd\python38"
           $env:PATH = "$pwd\i\bin;$pwd\i\lib;$env:MINGW_BIN_DIR;$env:MINGW_BIN_DIR\..\x86_64-w64-mingw32\bin;$env:NINJA_BIN_DIR;$env:PATH"
@@ -96,7 +96,7 @@ jobs:
           mkdir i
           compact /c b_deps i
           mkdir i\bin
-          #cp llvm-mingw-x86_64-20220915-cfguard\x86_64-w64-mingw32\bin\libclang_rt.asan_dynamic-x86_64.dll i\bin\
+          #cp llvm-mingw-x86_64-20220923-cfguard\x86_64-w64-mingw32\bin\libclang_rt.asan_dynamic-x86_64.dll i\bin\
           cmd /c krita-src\build-tools\windows\build.cmd --no-interactive --skip-krita --download-dir "$pwd\d" --deps-build-dir "$pwd\b_deps" --deps-install-dir "$pwd\i"
           rm -r -fo d
           rm -r -fo b_deps
@@ -137,13 +137,13 @@ jobs:
 
       - name: Install compiler
         run: |
-          Invoke-WebRequest "https://github.com/alvinhochun/llvm-mingw/releases/download/20220915-cfguard/llvm-mingw-x86_64-20220915-cfguard.zip" -OutFile llvm-mingw.zip
-          mkdir llvm-mingw-x86_64-20220915-cfguard
-          compact /c llvm-mingw-x86_64-20220915-cfguard
+          Invoke-WebRequest "https://github.com/alvinhochun/llvm-mingw/releases/download/20220923-cfguard/llvm-mingw-x86_64-20220923-cfguard.zip" -OutFile llvm-mingw.zip
+          mkdir llvm-mingw-x86_64-20220923-cfguard
+          compact /c llvm-mingw-x86_64-20220923-cfguard
           7z x llvm-mingw.zip
           rm llvm-mingw.zip
-          if (!(Test-Path "$pwd\llvm-mingw-x86_64-20220915-cfguard\bin\clang++.exe")) { return 1 }
-          #cp llvm-mingw-x86_64-20220915-cfguard\x86_64-w64-mingw32\bin\libclang_rt.asan_dynamic-x86_64.dll C:\krita-deps\i\bin\
+          if (!(Test-Path "$pwd\llvm-mingw-x86_64-20220923-cfguard\bin\clang++.exe")) { return 1 }
+          #cp llvm-mingw-x86_64-20220923-cfguard\x86_64-w64-mingw32\bin\libclang_rt.asan_dynamic-x86_64.dll C:\krita-deps\i\bin\
       - name: Install Ninja
         run: |
           Invoke-WebRequest "https://github.com/ninja-build/ninja/releases/download/v1.11.0/ninja-win.zip" -OutFile ninja-win.zip
@@ -158,7 +158,7 @@ jobs:
       - name: Build krita
         run: |
           $env:PATH = "C:\Program Files\Git\cmd;$env:PATH"
-          $env:MINGW_BIN_DIR = "$pwd\llvm-mingw-x86_64-20220915-cfguard\bin"
+          $env:MINGW_BIN_DIR = "$pwd\llvm-mingw-x86_64-20220923-cfguard\bin"
           $env:NINJA_BIN_DIR = "$pwd\ninja"
           # $env:PYTHON_BIN_DIR = "$pwd\python38"
           $env:PATH = "$pwd\i\bin;$pwd\i\lib;$env:MINGW_BIN_DIR;$env:MINGW_BIN_DIR\..\x86_64-w64-mingw32\bin;$env:NINJA_BIN_DIR;$env:PATH"
@@ -175,7 +175,7 @@ jobs:
       - name: Package Krita
         run: |
           $env:PATH = "C:\Program Files\Git\cmd;$env:PATH"
-          $env:MINGW_BIN_DIR = "$pwd\llvm-mingw-x86_64-20220915-cfguard\bin"
+          $env:MINGW_BIN_DIR = "$pwd\llvm-mingw-x86_64-20220923-cfguard\bin"
           $env:NINJA_BIN_DIR = "$pwd\ninja"
           # $env:PYTHON_BIN_DIR = "$pwd\python38"
           $env:PATH = "$pwd\i\bin;$pwd\i\lib;$env:MINGW_BIN_DIR;$env:MINGW_BIN_DIR\..\x86_64-w64-mingw32\bin;$env:NINJA_BIN_DIR;$env:PATH"
